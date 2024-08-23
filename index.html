@@ -1,21 +1,25 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editable Two-Column Philosophical Debate Chart</title>
+    <title>Centered Editable Two-Column Philosophical Debate Chart</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
             line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            background-color: #f0f0f0;
         }
-        h1 {
-            text-align: center;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 20px;
+        .container {
+            width: 66%;
+            max-width: 1000px;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         .search, .add-card {
             margin-bottom: 20px;
@@ -30,6 +34,9 @@
         .column h2 {
             text-align: center;
             color: #333;
+            background-color: #e9e9e9;
+            padding: 10px;
+            margin-top: 0;
         }
         .card {
             border: 1px solid #ccc;
@@ -53,6 +60,7 @@
             width: 100%;
             padding: 5px;
             margin-bottom: 10px;
+            box-sizing: border-box;
         }
         .add-card button, .card button {
             padding: 5px 10px;
@@ -71,6 +79,7 @@
             background-color: #f9f9f9;
             border: 1px solid #ccc;
             padding: 5px;
+            z-index: 1000;
         }
         .context-menu button {
             display: block;
@@ -87,28 +96,29 @@
     </style>
 </head>
 <body>
-    <h1>Debate Topic: The Problem of Evil in Theism</h1>
-    <div class="search">
-        <input type="text" id="searchInput" placeholder="Search arguments...">
-        <button onclick="searchArguments()">Search</button>
-    </div>
-    <div class="add-card">
-        <h3>Add New Argument</h3>
-        <input type="text" id="newTitle" placeholder="Title">
-        <textarea id="newText" placeholder="Main argument"></textarea>
-        <textarea id="newSupport" placeholder="Supporting information"></textarea>
-        <select id="argumentSide">
-            <option value="against">Against</option>
-            <option value="for">For</option>
-        </select>
-        <button onclick="addNewCard()">Add Argument</button>
-    </div>
-    <div class="debate-container">
-        <div class="column" id="againstColumn">
-            <h2>Against</h2>
+    <div class="container">
+        <div class="search">
+            <input type="text" id="searchInput" placeholder="Search arguments...">
+            <button onclick="searchArguments()">Search</button>
         </div>
-        <div class="column" id="forColumn">
-            <h2>For</h2>
+        <div class="add-card">
+            <h3>Add New Argument</h3>
+            <input type="text" id="newTitle" placeholder="Title">
+            <textarea id="newText" placeholder="Main argument"></textarea>
+            <textarea id="newSupport" placeholder="Supporting information"></textarea>
+            <select id="argumentSide">
+                <option value="against">Against</option>
+                <option value="for">For</option>
+            </select>
+            <button onclick="addNewCard()">Add Argument</button>
+        </div>
+        <div class="debate-container">
+            <div class="column" id="againstColumn">
+                <h2>Against</h2>
+            </div>
+            <div class="column" id="forColumn">
+                <h2>For</h2>
+            </div>
         </div>
     </div>
     <div id="contextMenu" class="context-menu">
@@ -116,13 +126,7 @@
     </div>
 
     <script>
-        // The rest of your JavaScript code remains unchanged
-        // ... (Your existing JavaScript code here)
-    </script>
-</body>
-</html>
-
-    <script>
+        // The JavaScript remains the same as in the previous version
         let debateData = {
             against: [
                 {
