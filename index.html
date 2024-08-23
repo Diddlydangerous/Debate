@@ -1,37 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<html lang="en"><iframe class="cleanslate hidden" src="debate-chart%205th%20gen%20example_files/commandline.htm" id="cmdline_iframe" loading="lazy" style="height: 0px !important;"></iframe><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supabase-Enabled Debate Chart</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Centered Editable Two-Column Philosophical Debate Chart</title>
+    <title>Debate: The Problem of Evil</title>
     <style>
-        /* CSS remains the same as the previous version */
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            line-height: 1.6;
-            display: flex;
-            justify-content: center;
-            background-color: #f0f0f0;
+@@ -94,39 +94,68 @@
+            background-color: #e9e9e9;
         }
-        .container {
-            width: 66%;
-            max-width: 1000px;
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        /* ... (rest of the CSS remains unchanged) ... */
     </style>
 </head>
+<style type="text/css">@media print {
+        .TridactylStatusIndicator {
+            display: none !important;
+        }
+    }</style></head>
 <body>
     <div class="container">
+        <div id="editableTitle" contenteditable="true" style="font-size: 24px; font-weight: bold; text-align: center; padding: 10px; background-color: #e9e9e9; border-radius: 5px;"><div>Debate: The Problem of Evil</div></div>
+
         <div class="search">
             <input type="text" id="searchInput" placeholder="Search arguments...">
             <button onclick="searchArguments()">Search</button>
         </div>
+
         <div class="add-card">
             <h3>Add New Argument</h3>
             <input type="text" id="newTitle" placeholder="Title">
@@ -39,10 +36,12 @@
             <textarea id="newSupport" placeholder="Supporting information"></textarea>
             <select id="argumentSide">
                 <option value="against">Against</option>
+                <option value="against" selected="selected">Against</option>
                 <option value="for">For</option>
             </select>
             <button onclick="addNewCard()">Add Argument</button>
         </div>
+
         <div class="debate-container">
             <div class="column" id="againstColumn">
                 <h2>Against</h2>
@@ -50,195 +49,117 @@
             <div class="column" id="forColumn">
                 <h2>For</h2>
             </div>
+            <div class="column" id="againstColumn"><h2>Against</h2><div class="card" data-id="1" data-side="against">
+                <h3>Epicurus Paradox</h3>
+                <p>Is God willing to prevent evil, but not able? Then he
+ is not omnipotent. Is he able, but not willing? Then he is malevolent. 
+Is he both able and willing? Then whence cometh evil? Is he neither able
+ nor willing? Then why call him God?</p>
+                <div class="support">This paradox challenges the concept of an omnipotent, omniscient, and omnibenevolent God in the face of the existence of evil.</div>
+            </div><div class="card" data-id="1724443838591" data-side="against">
+                <h3>POE debate</h3>
+                <p>Is libertarian free will compatible with doing evil?</p>
+                <div class="support"><a href="https://youtu.be/9REoaNtUJBw?si=fYk_v4NUE_5Ftksd&amp;t=3589" target="_blank">Problem of evil debate (time stamped)</a>
+</div>
+            </div><div class="card" data-id="1724444599933" data-side="against">
+                <h3>Chatgpt Thread </h3>
+                <p>Pros and cons of Biblical morality </p>
+                <div class="support"><a href="https://chatgpt.com/share/3f6311d3-f396-400c-83a8-840ed971c645" target="_blank">Chatgpt Thread</a></div>
+            </div></div>
+            <div class="column" id="forColumn"><h2>For</h2><div class="card" data-id="2" data-side="for">
+                <h3>Augustinian Free Will</h3>
+                <p>Evil is not a positive entity created by God, but a privation of good. Humans, having free will, are responsible for moral evil.</p>
+                <div class="support">Quote from Augustine: 'For evil has no positive nature; but the loss of good has received the name 'evil.'</div>
+            </div><div class="card" data-id="3" data-side="for">
+                <h3>Modern Perspective on the Problem of Evil</h3>
+                <p>Contemporary philosophical discussions on the problem of evil and its implications for theism.</p>
+                <div class="support"><a href="https://www.youtube.com/watch?app=desktop&amp;v=rac2g_a5ukI" target="_blank">Watch: YouTube video on the Problem of Evil</a></div>
+            </div></div>
         </div>
     </div>
     <div id="contextMenu" class="context-menu">
+
+    <div id="contextMenu" class="context-menu" style="display: none; left: 1049px; top: 945px;" data-card-id="1724444469338" data-side="for">
         <button onclick="editCard(this)">Edit</button>
+        <button onclick="deleteCard(this)">Delete</button>
     </div>
 
     <script>
-        // Initialize Supabase client
-        const supabaseUrl = 'https://nhzsthjygbacyybgmxlb.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oenN0aGp5Z2JhY3l5YmdteGxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ0NTAwMDUsImV4cCI6MjA0MDAyNjAwNX0.7GF7L33ZNfo8cRkL8cf6nMXyITx8I8O2R9J-Gj8grtM';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-        let debateData = { against: [], for: [] };
-
-        async function loadDebateData() {
-            const { data, error } = await supabase
-                .from('arguments')
-                .select('*');
-
-            if (error) {
-                console.error('Error loading data:', error);
-                return;
-            }
-
-            debateData = { against: [], for: [] };
-            data.forEach(arg => {
-                debateData[arg.side].push(arg);
-            });
-
-            renderArguments();
-        }
-
-        async function saveArgument(argument) {
-            const { data, error } = await supabase
-                .from('arguments')
-                .upsert(argument);
-
-            if (error) {
-                console.error('Error saving argument:', error);
-            }
-        }
-
-        async function deleteArgument(id) {
-            const { error } = await supabase
-                .from('arguments')
-                .delete()
-                .match({ id: id });
-
-            if (error) {
-                console.error('Error deleting argument:', error);
-            }
-        }
-
-        function renderArguments() {
-            const againstColumn = document.getElementById('againstColumn');
-            const forColumn = document.getElementById('forColumn');
-            
-            againstColumn.innerHTML = '<h2>Against</h2>';
-            forColumn.innerHTML = '<h2>For</h2>';
-            
-            debateData.against.forEach(arg => {
-                const card = createCard(arg, 'against');
-                againstColumn.appendChild(card);
-            });
-            
-            debateData.for.forEach(arg => {
-                const card = createCard(arg, 'for');
-                forColumn.appendChild(card);
-            });
-        }
-
-        function createCard(arg, side) {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.dataset.id = arg.id;
-            card.dataset.side = side;
-            card.innerHTML = `
-                <h3>${arg.title}</h3>
-                <p>${arg.text}</p>
-                <div class="support">${arg.support}</div>
-            `;
-            card.addEventListener('contextmenu', showContextMenu);
-            return card;
-        }
-
-        function showContextMenu(e) {
-            e.preventDefault();
-            const contextMenu = document.getElementById('contextMenu');
-            contextMenu.style.display = 'block';
-            contextMenu.style.left = `${e.pageX}px`;
-            contextMenu.style.top = `${e.pageY}px`;
-            contextMenu.dataset.cardId = e.currentTarget.dataset.id;
-            contextMenu.dataset.side = e.currentTarget.dataset.side;
-        }
-
-        document.addEventListener('click', function() {
-            document.getElementById('contextMenu').style.display = 'none';
-        });
-
-        function editCard(button) {
-            const contextMenu = button.parentElement;
-            const cardId = contextMenu.dataset.cardId;
-            const side = contextMenu.dataset.side;
-            const card = document.querySelector(`.card[data-id="${cardId}"][data-side="${side}"]`);
-            const argument = debateData[side].find(arg => arg.id == cardId);
-
-            card.innerHTML = `
-                <input type="text" value="${argument.title}" id="editTitle${cardId}">
-                <textarea id="editText${cardId}">${argument.text}</textarea>
-                <textarea id="editSupport${cardId}">${argument.support}</textarea>
-                <button onclick="saveEdit('${side}', ${cardId})">Save</button>
-                <button class="cancel" onclick="cancelEdit('${side}', ${cardId})">Cancel</button>
-            `;
-        }
-
-        async function saveEdit(side, id) {
-            const argument = debateData[side].find(arg => arg.id == id);
-            argument.title = document.getElementById(`editTitle${id}`).value;
-            argument.text = document.getElementById(`editText${id}`).value;
-            argument.support = document.getElementById(`editSupport${id}`).value;
-
-            await saveArgument(argument);
-            await loadDebateData();
-        }
-
-        function cancelEdit(side, id) {
-            renderArguments();
-        }
-
-        function searchArguments() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const filteredData = {
-                against: debateData.against.filter(arg => 
-                    arg.title.toLowerCase().includes(searchTerm) ||
-                    arg.text.toLowerCase().includes(searchTerm) ||
-                    arg.support.toLowerCase().includes(searchTerm)
-                ),
-                for: debateData.for.filter(arg => 
-                    arg.title.toLowerCase().includes(searchTerm) ||
-                    arg.text.toLowerCase().includes(searchTerm) ||
+        // The JavaScript remains the same as in the previous version
+        let debateData = {
+            against: [
+                {
+@@ -240,52 +269,46 @@ <h3>${arg.title}</h3>
                     arg.support.toLowerCase().includes(searchTerm)
                 )
             };
-            
+
             const againstColumn = document.getElementById('againstColumn');
             const forColumn = document.getElementById('forColumn');
-            
+
             againstColumn.innerHTML = '<h2>Against</h2>';
             forColumn.innerHTML = '<h2>For</h2>';
-            
+
             filteredData.against.forEach(arg => {
                 const card = createCard(arg, 'against');
                 againstColumn.appendChild(card);
             });
-            
+
             filteredData.for.forEach(arg => {
                 const card = createCard(arg, 'for');
                 forColumn.appendChild(card);
             });
+            renderArguments(filteredData);
         }
 
-        async function addNewCard() {
+        function addNewCard() {
             const title = document.getElementById('newTitle').value;
             const text = document.getElementById('newText').value;
             const support = document.getElementById('newSupport').value;
             const side = document.getElementById('argumentSide').value;
             
+
             if (title && text) {
                 const newCard = {
+                    id: Date.now(), // Using timestamp as a unique ID
+                debateData[side].push({
+                    id: Date.now(),
                     title: title,
                     text: text,
-                    support: support,
-                    side: side
+                    support: support
                 };
-                
-                await saveArgument(newCard);
-                await loadDebateData();
-                
+                debateData[side].push(newCard);
+                });
+                renderArguments();
+
                 // Clear input fields
                 document.getElementById('newTitle').value = '';
                 document.getElementById('newText').value = '';
                 document.getElementById('newSupport').value = '';
             } else {
                 alert('Please enter at least a title and main argument.');
+                alert("Title and main argument are required!");
             }
         }
 
-        // Initial load
-        loadDebateData();
+        // Initial render
+        function deleteCard(button) {
+            const contextMenu = button.parentElement;
+            const cardId = contextMenu.dataset.cardId;
+            const side = contextMenu.dataset.side;
+            debateData[side] = debateData[side].filter(arg => arg.id != cardId);
+            renderArguments();
+        }
+
+        document.getElementById('editableTitle').addEventListener('input', function() {
+            document.title = this.textContent;  // Update the document's title dynamically
+        });
+
+        // Initial rendering of arguments
+        renderArguments();
     </script>
 </body>
 </html>
+
+<span class="cleanslate TridactylStatusIndicator TridactylModeinsert">insert</span></body></html>
+
