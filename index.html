@@ -1,54 +1,128 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editable Two-Column Philosophical Debate Chart</title>
     <style>
-        /* ... (previous CSS remains unchanged) ... */
-        .context-menu button.delete {
-            color: #f44336;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .search, .add-card {
+            margin-bottom: 20px;
+        }
+        .debate-container {
+            display: flex;
+            gap: 20px;
+        }
+        .column {
+            flex: 1;
+        }
+        .column h2 {
+            text-align: center;
+            color: #333;
+        }
+        .card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .card p {
+            margin-bottom: 10px;
+        }
+        .card .support {
+            font-style: italic;
+            color: #666;
+        }
+        .add-card input, .add-card textarea, .card input, .card textarea {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        .add-card button, .card button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .card button.cancel {
+            background-color: #f44336;
+        }
+        .context-menu {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 5px;
+        }
+        .context-menu button {
+            display: block;
+            width: 100%;
+            padding: 5px;
+            text-align: left;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .context-menu button:hover {
+            background-color: #e9e9e9;
         }
     </style>
 </head>
 <body>
     <h1>Debate Topic: The Problem of Evil in Theism</h1>
-    <!-- ... (previous HTML remains unchanged) ... -->
+    <div class="search">
+        <input type="text" id="searchInput" placeholder="Search arguments...">
+        <button onclick="searchArguments()">Search</button>
+    </div>
+    <div class="add-card">
+        <h3>Add New Argument</h3>
+        <input type="text" id="newTitle" placeholder="Title">
+        <textarea id="newText" placeholder="Main argument"></textarea>
+        <textarea id="newSupport" placeholder="Supporting information"></textarea>
+        <select id="argumentSide">
+            <option value="against">Against</option>
+            <option value="for">For</option>
+        </select>
+        <button onclick="addNewCard()">Add Argument</button>
+    </div>
+    <div class="debate-container">
+        <div class="column" id="againstColumn">
+            <h2>Against</h2>
+        </div>
+        <div class="column" id="forColumn">
+            <h2>For</h2>
+        </div>
+    </div>
     <div id="contextMenu" class="context-menu">
         <button onclick="editCard(this)">Edit</button>
-        <button onclick="deleteCard(this)" class="delete">Delete</button>
     </div>
 
     <script>
-        // ... (previous JavaScript remains unchanged) ...
+        // The rest of your JavaScript code remains unchanged
+        // ... (Your existing JavaScript code here)
+    </script>
+</body>
+</html>
 
-        function showContextMenu(e) {
-            e.preventDefault();
-            const contextMenu = document.getElementById('contextMenu');
-            contextMenu.style.display = 'block';
-            contextMenu.style.left = `${e.pageX}px`;
-            contextMenu.style.top = `${e.pageY}px`;
-            contextMenu.dataset.cardId = e.currentTarget.dataset.id;
-            contextMenu.dataset.side = e.currentTarget.dataset.side;
-        }
-
-        // ... (other functions remain unchanged) ...
-
-        function deleteCard(button) {
-            const contextMenu = button.parentElement;
-            const cardId = contextMenu.dataset.cardId;
-            const side = contextMenu.dataset.side;
-
-            if (confirm('Are you sure you want to delete this argument?')) {
-                debateData[side] = debateData[side].filter(arg => arg.id != cardId);
-                renderArguments();
-            }
-
-            contextMenu.style.display = 'none';
-        }
-
-        <script>
-        // The JavaScript remains the same as in the previous version
+    <script>
         let debateData = {
             against: [
                 {
@@ -77,15 +151,15 @@
         function renderArguments() {
             const againstColumn = document.getElementById('againstColumn');
             const forColumn = document.getElementById('forColumn');
-            
+
             againstColumn.innerHTML = '<h2>Against</h2>';
             forColumn.innerHTML = '<h2>For</h2>';
-            
+
             debateData.against.forEach(arg => {
                 const card = createCard(arg, 'against');
                 againstColumn.appendChild(card);
             });
-            
+
             debateData.for.forEach(arg => {
                 const card = createCard(arg, 'for');
                 forColumn.appendChild(card);
@@ -162,18 +236,18 @@
                     arg.support.toLowerCase().includes(searchTerm)
                 )
             };
-            
+
             const againstColumn = document.getElementById('againstColumn');
             const forColumn = document.getElementById('forColumn');
-            
+
             againstColumn.innerHTML = '<h2>Against</h2>';
             forColumn.innerHTML = '<h2>For</h2>';
-            
+
             filteredData.against.forEach(arg => {
                 const card = createCard(arg, 'against');
                 againstColumn.appendChild(card);
             });
-            
+
             filteredData.for.forEach(arg => {
                 const card = createCard(arg, 'for');
                 forColumn.appendChild(card);
@@ -185,7 +259,7 @@
             const text = document.getElementById('newText').value;
             const support = document.getElementById('newSupport').value;
             const side = document.getElementById('argumentSide').value;
-            
+
             if (title && text) {
                 const newCard = {
                     id: Date.now(), // Using timestamp as a unique ID
@@ -195,7 +269,7 @@
                 };
                 debateData[side].push(newCard);
                 renderArguments();
-                
+
                 // Clear input fields
                 document.getElementById('newTitle').value = '';
                 document.getElementById('newText').value = '';
