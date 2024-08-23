@@ -1,0 +1,286 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editable Two-Column Philosophical Debate Chart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .search, .add-card {
+            margin-bottom: 20px;
+        }
+        .debate-container {
+            display: flex;
+            gap: 20px;
+        }
+        .column {
+            flex: 1;
+        }
+        .column h2 {
+            text-align: center;
+            color: #333;
+        }
+        .card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .card p {
+            margin-bottom: 10px;
+        }
+        .card .support {
+            font-style: italic;
+            color: #666;
+        }
+        .add-card input, .add-card textarea, .card input, .card textarea {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        .add-card button, .card button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .card button.cancel {
+            background-color: #f44336;
+        }
+        .context-menu {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 5px;
+        }
+        .context-menu button {
+            display: block;
+            width: 100%;
+            padding: 5px;
+            text-align: left;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .context-menu button:hover {
+            background-color: #e9e9e9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debate Topic: The Problem of Evil in Theism</h1>
+    <div class="search">
+        <input type="text" id="searchInput" placeholder="Search arguments...">
+        <button onclick="searchArguments()">Search</button>
+    </div>
+    <div class="add-card">
+        <h3>Add New Argument</h3>
+        <input type="text" id="newTitle" placeholder="Title">
+        <textarea id="newText" placeholder="Main argument"></textarea>
+        <textarea id="newSupport" placeholder="Supporting information"></textarea>
+        <select id="argumentSide">
+            <option value="against">Against</option>
+            <option value="for">For</option>
+        </select>
+        <button onclick="addNewCard()">Add Argument</button>
+    </div>
+    <div class="debate-container">
+        <div class="column" id="againstColumn">
+            <h2>Against</h2>
+        </div>
+        <div class="column" id="forColumn">
+            <h2>For</h2>
+        </div>
+    </div>
+    <div id="contextMenu" class="context-menu">
+        <button onclick="editCard(this)">Edit</button>
+    </div>
+
+    <script>
+        // The rest of your JavaScript code remains unchanged
+        // ... (Your existing JavaScript code here)
+    </script>
+</body>
+</html>
+
+    <script>
+        let debateData = {
+            against: [
+                {
+                    id: 1,
+                    title: "Epicurus Paradox",
+                    text: "Is God willing to prevent evil, but not able? Then he is not omnipotent. Is he able, but not willing? Then he is malevolent. Is he both able and willing? Then whence cometh evil? Is he neither able nor willing? Then why call him God?",
+                    support: "This paradox challenges the concept of an omnipotent, omniscient, and omnibenevolent God in the face of the existence of evil."
+                }
+            ],
+            for: [
+                {
+                    id: 2,
+                    title: "Augustinian Free Will",
+                    text: "Evil is not a positive entity created by God, but a privation of good. Humans, having free will, are responsible for moral evil.",
+                    support: "Quote from Augustine: 'For evil has no positive nature; but the loss of good has received the name 'evil.'"
+                },
+                {
+                    id: 3,
+                    title: "Modern Perspective on the Problem of Evil",
+                    text: "Contemporary philosophical discussions on the problem of evil and its implications for theism.",
+                    support: `<a href="https://www.youtube.com/watch?app=desktop&v=rac2g_a5ukI" target="_blank">Watch: YouTube video on the Problem of Evil</a>`
+                }
+            ]
+        };
+
+        function renderArguments() {
+            const againstColumn = document.getElementById('againstColumn');
+            const forColumn = document.getElementById('forColumn');
+            
+            againstColumn.innerHTML = '<h2>Against</h2>';
+            forColumn.innerHTML = '<h2>For</h2>';
+            
+            debateData.against.forEach(arg => {
+                const card = createCard(arg, 'against');
+                againstColumn.appendChild(card);
+            });
+            
+            debateData.for.forEach(arg => {
+                const card = createCard(arg, 'for');
+                forColumn.appendChild(card);
+            });
+        }
+
+        function createCard(arg, side) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.id = arg.id;
+            card.dataset.side = side;
+            card.innerHTML = `
+                <h3>${arg.title}</h3>
+                <p>${arg.text}</p>
+                <div class="support">${arg.support}</div>
+            `;
+            card.addEventListener('contextmenu', showContextMenu);
+            return card;
+        }
+
+        function showContextMenu(e) {
+            e.preventDefault();
+            const contextMenu = document.getElementById('contextMenu');
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = `${e.pageX}px`;
+            contextMenu.style.top = `${e.pageY}px`;
+            contextMenu.dataset.cardId = e.currentTarget.dataset.id;
+            contextMenu.dataset.side = e.currentTarget.dataset.side;
+        }
+
+        document.addEventListener('click', function() {
+            document.getElementById('contextMenu').style.display = 'none';
+        });
+
+        function editCard(button) {
+            const contextMenu = button.parentElement;
+            const cardId = contextMenu.dataset.cardId;
+            const side = contextMenu.dataset.side;
+            const card = document.querySelector(`.card[data-id="${cardId}"][data-side="${side}"]`);
+            const argument = debateData[side].find(arg => arg.id == cardId);
+
+            card.innerHTML = `
+                <input type="text" value="${argument.title}" id="editTitle${cardId}">
+                <textarea id="editText${cardId}">${argument.text}</textarea>
+                <textarea id="editSupport${cardId}">${argument.support}</textarea>
+                <button onclick="saveEdit('${side}', ${cardId})">Save</button>
+                <button class="cancel" onclick="cancelEdit('${side}', ${cardId})">Cancel</button>
+            `;
+        }
+
+        function saveEdit(side, id) {
+            const argument = debateData[side].find(arg => arg.id == id);
+            argument.title = document.getElementById(`editTitle${id}`).value;
+            argument.text = document.getElementById(`editText${id}`).value;
+            argument.support = document.getElementById(`editSupport${id}`).value;
+            renderArguments();
+        }
+
+        function cancelEdit(side, id) {
+            renderArguments();
+        }
+
+        function searchArguments() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredData = {
+                against: debateData.against.filter(arg => 
+                    arg.title.toLowerCase().includes(searchTerm) ||
+                    arg.text.toLowerCase().includes(searchTerm) ||
+                    arg.support.toLowerCase().includes(searchTerm)
+                ),
+                for: debateData.for.filter(arg => 
+                    arg.title.toLowerCase().includes(searchTerm) ||
+                    arg.text.toLowerCase().includes(searchTerm) ||
+                    arg.support.toLowerCase().includes(searchTerm)
+                )
+            };
+            
+            const againstColumn = document.getElementById('againstColumn');
+            const forColumn = document.getElementById('forColumn');
+            
+            againstColumn.innerHTML = '<h2>Against</h2>';
+            forColumn.innerHTML = '<h2>For</h2>';
+            
+            filteredData.against.forEach(arg => {
+                const card = createCard(arg, 'against');
+                againstColumn.appendChild(card);
+            });
+            
+            filteredData.for.forEach(arg => {
+                const card = createCard(arg, 'for');
+                forColumn.appendChild(card);
+            });
+        }
+
+        function addNewCard() {
+            const title = document.getElementById('newTitle').value;
+            const text = document.getElementById('newText').value;
+            const support = document.getElementById('newSupport').value;
+            const side = document.getElementById('argumentSide').value;
+            
+            if (title && text) {
+                const newCard = {
+                    id: Date.now(), // Using timestamp as a unique ID
+                    title: title,
+                    text: text,
+                    support: support
+                };
+                debateData[side].push(newCard);
+                renderArguments();
+                
+                // Clear input fields
+                document.getElementById('newTitle').value = '';
+                document.getElementById('newText').value = '';
+                document.getElementById('newSupport').value = '';
+            } else {
+                alert('Please enter at least a title and main argument.');
+            }
+        }
+
+        // Initial render
+        renderArguments();
+    </script>
+</body>
+</html>
