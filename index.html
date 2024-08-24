@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><iframe class="cleanslate hidden" src="debate-chart%205th%20gen%20example_files/commandline.htm" id="cmdline_iframe" loading="lazy" style="height: 0px !important;"></iframe><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Debate: The Problem of Evil</title>
@@ -94,14 +94,12 @@
             background-color: #e9e9e9;
         }
     </style>
-<style type="text/css">@media print {
-        .TridactylStatusIndicator {
-            display: none !important;
-        }
-    }</style></head>
+</head>
 <body>
     <div class="container">
-        <div id="editableTitle" contenteditable="true" style="font-size: 24px; font-weight: bold; text-align: center; padding: 10px; background-color: #e9e9e9; border-radius: 5px;"><div>Debate: The Problem of Evil</div></div>
+        <div id="editableTitle" contenteditable="true" style="font-size: 24px; font-weight: bold; text-align: center; padding: 10px; background-color: #e9e9e9; border-radius: 5px;">
+            <div>Debate: The Problem of Evil</div>
+        </div>
 
         <div class="search">
             <input type="text" id="searchInput" placeholder="Search arguments...">
@@ -121,38 +119,24 @@
         </div>
 
         <div class="debate-container">
-            <div class="column" id="againstColumn"><h2>Against</h2><div class="card" data-id="1" data-side="against">
-                <h3>Epicurus Paradox</h3>
-                <p>Is God willing to prevent evil, but not able? Then he
- is not omnipotent. Is he able, but not willing? Then he is malevolent. 
-Is he both able and willing? Then whence cometh evil? Is he neither able
- nor willing? Then why call him God?</p>
-                <div class="support">This paradox challenges the concept of an omnipotent, omniscient, and omnibenevolent God in the face of the existence of evil.</div>
-            </div><div class="card" data-id="1724443838591" data-side="against">
-                <h3>POE debate</h3>
-                <p>Is libertarian free will compatible with doing evil?</p>
-                <div class="support"><a href="https://youtu.be/9REoaNtUJBw?si=fYk_v4NUE_5Ftksd&amp;t=3589" target="_blank">Problem of evil debate (time stamped)</a>
-</div>
-            </div><div class="card" data-id="1724444599933" data-side="against">
-                <h3>Chatgpt Thread </h3>
-                <p>Pros and cons of Biblical morality </p>
-                <div class="support"><a href="https://chatgpt.com/share/3f6311d3-f396-400c-83a8-840ed971c645" target="_blank">Chatgpt Thread</a></div>
-            </div></div>
-            <div class="column" id="forColumn"><h2>For</h2><div class="card" data-id="2" data-side="for">
-                <h3>Augustinian Free Will</h3>
-                <p>Evil is not a positive entity created by God, but a privation of good. Humans, having free will, are responsible for moral evil.</p>
-                <div class="support">Quote from Augustine: 'For evil has no positive nature; but the loss of good has received the name 'evil.'</div>
-            </div><div class="card" data-id="3" data-side="for">
-                <h3>Modern Perspective on the Problem of Evil</h3>
-                <p>Contemporary philosophical discussions on the problem of evil and its implications for theism.</p>
-                <div class="support"><a href="https://www.youtube.com/watch?app=desktop&amp;v=rac2g_a5ukI" target="_blank">Watch: YouTube video on the Problem of Evil</a></div>
-            </div></div>
+            <div class="column" id="againstColumn">
+                <h2>Against</h2>
+            </div>
+            <div class="column" id="forColumn">
+                <h2>For</h2>
+            </div>
         </div>
-    </div>
 
-    <div id="contextMenu" class="context-menu" style="display: none; left: 1049px; top: 945px;" data-card-id="1724444469338" data-side="for">
-        <button onclick="editCard(this)">Edit</button>
-        <button onclick="deleteCard(this)">Delete</button>
+        <div id="contextMenu" class="context-menu">
+            <button onclick="editCard(this)">Edit</button>
+            <button onclick="deleteCard(this)">Delete</button>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button onclick="saveDebate()">Save Debate As</button>
+            <input type="file" id="loadDebateFile" style="display:none" onchange="loadDebate(event)">
+            <button onclick="document.getElementById('loadDebateFile').click()">Load Debate</button>
+        </div>
     </div>
 
     <script>
@@ -259,6 +243,8 @@ Is he both able and willing? Then whence cometh evil? Is he neither able
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const filteredData = {
                 against: debateData.against.filter(arg => 
+
+
                     arg.title.toLowerCase().includes(searchTerm) ||
                     arg.text.toLowerCase().includes(searchTerm) ||
                     arg.support.toLowerCase().includes(searchTerm)
@@ -269,29 +255,45 @@ Is he both able and willing? Then whence cometh evil? Is he neither able
                     arg.support.toLowerCase().includes(searchTerm)
                 )
             };
-            renderArguments(filteredData);
+            renderFilteredArguments(filteredData);
+        }
+
+        function renderFilteredArguments(filteredData) {
+            const againstColumn = document.getElementById('againstColumn');
+            const forColumn = document.getElementById('forColumn');
+            
+            againstColumn.innerHTML = '<h2>Against</h2>';
+            forColumn.innerHTML = '<h2>For</h2>';
+            
+            filteredData.against.forEach(arg => {
+                const card = createCard(arg, 'against');
+                againstColumn.appendChild(card);
+            });
+            
+            filteredData.for.forEach(arg => {
+                const card = createCard(arg, 'for');
+                forColumn.appendChild(card);
+            });
         }
 
         function addNewCard() {
+            const side = document.getElementById('argumentSide').value;
             const title = document.getElementById('newTitle').value;
             const text = document.getElementById('newText').value;
             const support = document.getElementById('newSupport').value;
-            const side = document.getElementById('argumentSide').value;
 
-            if (title && text) {
-                debateData[side].push({
-                    id: Date.now(),
-                    title: title,
-                    text: text,
-                    support: support
-                });
-                renderArguments();
-                document.getElementById('newTitle').value = '';
-                document.getElementById('newText').value = '';
-                document.getElementById('newSupport').value = '';
-            } else {
-                alert("Title and main argument are required!");
-            }
+            const newArgument = {
+                id: Date.now(),
+                title,
+                text,
+                support
+            };
+            debateData[side].push(newArgument);
+            renderArguments();
+
+            document.getElementById('newTitle').value = '';
+            document.getElementById('newText').value = '';
+            document.getElementById('newSupport').value = '';
         }
 
         function deleteCard(button) {
@@ -302,13 +304,33 @@ Is he both able and willing? Then whence cometh evil? Is he neither able
             renderArguments();
         }
 
-        document.getElementById('editableTitle').addEventListener('input', function() {
-            document.title = this.textContent;  // Update the document's title dynamically
+        function saveDebate() {
+            const debateTitle = document.getElementById('editableTitle').textContent.trim();
+            const fileName = debateTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.json';
+            const fileContent = JSON.stringify({ title: debateTitle, data: debateData }, null, 2);
+            const blob = new Blob([fileContent], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+        }
+
+        function loadDebate(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const loadedData = JSON.parse(e.target.result);
+                document.getElementById('editableTitle').textContent = loadedData.title;
+                debateData = loadedData.data;
+                renderArguments();
+            };
+            reader.readAsText(file);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderArguments();
         });
-
-        // Initial rendering of arguments
-        renderArguments();
     </script>
-
-<span class="cleanslate TridactylStatusIndicator TridactylModeinsert">insert</span></body></html>
-
+</body>
+</html>
+```
