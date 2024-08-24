@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -130,6 +131,7 @@
         <div id="contextMenu" class="context-menu">
             <button onclick="editCard(this)">Edit</button>
             <button onclick="deleteCard(this)">Delete</button>
+            <button onclick="addHyperlink()">Add Hyperlink</button>
         </div>
 
         <div style="margin-top: 20px;">
@@ -211,6 +213,26 @@
             document.getElementById('contextMenu').style.display = 'none';
         });
 
+function addHyperlink() {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const url = prompt("Enter the URL:");
+        const linkText = selection.toString();
+
+        if (url) {
+            const anchor = document.createElement("a");
+            anchor.href = url.startsWith('http://') || url.startsWith('https://') ? url : `http://${url}`;
+            anchor.target = "_blank";
+            anchor.innerHTML = `Link: '${linkText}'`;
+            range.deleteContents();
+            range.insertNode(anchor);
+        }
+    }
+    document.getElementById('contextMenu').style.display = 'none';
+}
+
+
         function editCard(button) {
             const contextMenu = button.parentElement;
             const cardId = contextMenu.dataset.cardId;
@@ -223,77 +245,28 @@
                 <textarea id="editText${cardId}">${argument.text}</textarea>
                 <textarea id="editSupport${cardId}">${argument.support}</textarea>
                 <button onclick="saveEdit('${side}', ${cardId})">Save</button>
-                <button class="cancel" onclick="cancelEdit('${side}', ${cardId})">Cancel</button>
+                <button class="cancel" onclick="cancelEdit('${side}', ${cardId})">Cancel</button
+
+>
             `;
+            contextMenu.style.display = 'none';
         }
 
-        function saveEdit(side, id) {
-            const argument = debateData[side].find(arg => arg.id == id);
-            argument.title = document.getElementById(`editTitle${id}`).value;
-            argument.text = document.getElementById(`editText${id}`).value;
-            argument.support = document.getElementById(`editSupport${id}`).value;
+        function saveEdit(side, cardId) {
+            const title = document.getElementById(`editTitle${cardId}`).value;
+            const text = document.getElementById(`editText${cardId}`).value;
+            const support = document.getElementById(`editSupport${cardId}`).value;
+            
+            const argument = debateData[side].find(arg => arg.id == cardId);
+            argument.title = title;
+            argument.text = text;
+            argument.support = support;
+            
             renderArguments();
         }
 
-        function cancelEdit(side, id) {
+        function cancelEdit(side, cardId) {
             renderArguments();
-        }
-
-        function searchArguments() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const filteredData = {
-                against: debateData.against.filter(arg => 
-
-
-                    arg.title.toLowerCase().includes(searchTerm) ||
-                    arg.text.toLowerCase().includes(searchTerm) ||
-                    arg.support.toLowerCase().includes(searchTerm)
-                ),
-                for: debateData.for.filter(arg => 
-                    arg.title.toLowerCase().includes(searchTerm) ||
-                    arg.text.toLowerCase().includes(searchTerm) ||
-                    arg.support.toLowerCase().includes(searchTerm)
-                )
-            };
-            renderFilteredArguments(filteredData);
-        }
-
-        function renderFilteredArguments(filteredData) {
-            const againstColumn = document.getElementById('againstColumn');
-            const forColumn = document.getElementById('forColumn');
-            
-            againstColumn.innerHTML = '<h2>Against</h2>';
-            forColumn.innerHTML = '<h2>For</h2>';
-            
-            filteredData.against.forEach(arg => {
-                const card = createCard(arg, 'against');
-                againstColumn.appendChild(card);
-            });
-            
-            filteredData.for.forEach(arg => {
-                const card = createCard(arg, 'for');
-                forColumn.appendChild(card);
-            });
-        }
-
-        function addNewCard() {
-            const side = document.getElementById('argumentSide').value;
-            const title = document.getElementById('newTitle').value;
-            const text = document.getElementById('newText').value;
-            const support = document.getElementById('newSupport').value;
-
-            const newArgument = {
-                id: Date.now(),
-                title,
-                text,
-                support
-            };
-            debateData[side].push(newArgument);
-            renderArguments();
-
-            document.getElementById('newTitle').value = '';
-            document.getElementById('newText').value = '';
-            document.getElementById('newSupport').value = '';
         }
 
         function deleteCard(button) {
@@ -304,32 +277,87 @@
             renderArguments();
         }
 
+        function addNewCard() {
+            const newTitle = document.getElementById('newTitle').value;
+            const newText = document.getElementById('newText').value;
+            const newSupport = document.getElementById('newSupport').value;
+            const argumentSide = document.getElementById('argumentSide').value;
+
+            if (newTitle && newText) {
+                const newCard = {
+                    id: Date.now(),
+                    title: newTitle,
+                    text: newText,
+                    support: newSupport
+                };
+
+                debateData[argumentSide].push(newCard);
+                renderArguments();
+                
+                document.getElementById('newTitle').value = '';
+                document.getElementById('newText').value = '';
+                document.getElementById('newSupport').value = '';
+            }
+        }
+
+        function searchArguments() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+
+            const filteredAgainst = debateData.against.filter(arg => arg.title.toLowerCase().includes(searchInput) || arg.text.toLowerCase().includes(searchInput));
+            const filteredFor = debateData.for.filter(arg => arg.title.toLowerCase().includes(searchInput) || arg.text.toLowerCase().includes(searchInput));
+
+            document.getElementById('againstColumn').innerHTML = '<h2>Against</h2>';
+            document.getElementById('forColumn').innerHTML = '<h2>For</h2>';
+
+            filteredAgainst.forEach(arg => {
+                const card = createCard(arg, 'against');
+                document.getElementById('againstColumn').appendChild(card);
+            });
+
+            filteredFor.forEach(arg => {
+                const card = createCard(arg, 'for');
+                document.getElementById('forColumn').appendChild(card);
+            });
+        }
+
         function saveDebate() {
-            const debateTitle = document.getElementById('editableTitle').textContent.trim();
-            const fileName = debateTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.json';
-            const fileContent = JSON.stringify({ title: debateTitle, data: debateData }, null, 2);
-            const blob = new Blob([fileContent], { type: 'application/json' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = fileName;
-            link.click();
+            const editableTitle = document.getElementById('editableTitle').innerText.trim();
+            const updatedDebateData = {
+                title: editableTitle,
+                against: debateData.against,
+                for: debateData.for
+            };
+
+            const json = JSON.stringify(updatedDebateData, null, 2);
+            const blob = new Blob([json], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${editableTitle}.json`;
+            a.click();
+
+            URL.revokeObjectURL(url);
         }
 
         function loadDebate(event) {
             const file = event.target.files[0];
             const reader = new FileReader();
+
             reader.onload = function(e) {
-                const loadedData = JSON.parse(e.target.result);
-                document.getElementById('editableTitle').textContent = loadedData.title;
-                debateData = loadedData.data;
+                const json = e.target.result;
+                const loadedDebateData = JSON.parse(json);
+                debateData = loadedDebateData;
+                document.getElementById('editableTitle').innerText = loadedDebateData.title;
                 renderArguments();
             };
+
             reader.readAsText(file);
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        window.onload = function() {
             renderArguments();
-        });
+        };
     </script>
 </body>
 </html>
