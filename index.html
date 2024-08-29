@@ -4,22 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Debate: The Problem of Evil</title>
-    <style>
+  
+  <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
             line-height: 1.6;
-            display: flex;
-            justify-content: center;
-            background-color: #f0f0f0;
         }
         .container {
-            width: 66%;
-            max-width: 1000px;
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        #editableTitle {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            background-color: #e9e9e9;
+            border-radius: 5px;
+            margin-bottom: 20px;
         }
         .search, .add-card {
             margin-bottom: 20px;
@@ -30,48 +34,89 @@
         }
         .column {
             flex: 1;
+            min-height: 300px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
         }
         .column h2 {
             text-align: center;
-            color: #333;
-            background-color: #e9e9e9;
+            background-color: #e0e0e0;
             padding: 10px;
             margin-top: 0;
+            border-radius: 5px 5px 0 0;
         }
         .card {
             border: 1px solid #ccc;
             padding: 15px;
             margin-bottom: 15px;
+            background-color: #fff;
             border-radius: 5px;
-            background-color: #f9f9f9;
+            position: relative;
         }
         .card h3 {
             margin-top: 0;
-            color: #333;
-        }
-        .card p {
-            margin-bottom: 10px;
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin: -15px -15px 15px -15px;
+            border-radius: 5px 5px 0 0;
         }
         .card .support {
             font-style: italic;
-            color: #666;
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin: 10px -15px -15px -15px;
+            border-top: 1px solid #eee;
+            border-radius: 0 0 5px 5px;
         }
-        .add-card input, .add-card textarea, .card input, .card textarea {
+        .dropzone {
+            border: 2px dashed #007bff;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .dropzone.drag-over {
+            background-color: #e6f3ff;
+        }
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+        }
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            padding: 5px;
-            margin-bottom: 10px;
-            box-sizing: border-box;
+            height: 100%;
         }
-        .add-card button, .card button {
-            padding: 5px 10px;
+        #addArgumentForm {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        #addArgumentForm input, #addArgumentForm textarea, #addArgumentForm select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #addArgumentForm button {
             background-color: #4CAF50;
             color: white;
+            padding: 10px 15px;
             border: none;
+            border-radius: 4px;
             cursor: pointer;
-            margin-right: 5px;
         }
-        .card button.cancel {
-            background-color: #f44336;
+        #addArgumentForm button:hover {
+            background-color: #45a049;
         }
         .context-menu {
             display: none;
@@ -93,60 +138,87 @@
         .context-menu button:hover {
             background-color: #e9e9e9;
         }
+        .hashtag-suggestions {
+        background-color: white;
+        border: 1px solid #ccc;
+        max-height: 150px;
+        overflow-y: auto;
+        }
+        .hashtag-suggestions div {
+        padding: 5px;
+        cursor: pointer;
+        }
+        .hashtag-suggestions div:hover {
+        background-color: #f0f0f0;
+        }
+</style>
     </style>
 </head>
 <body>
     <div class="container">
-        <div id="editableTitle" contenteditable="true" style="font-size: 24px; font-weight: bold; text-align: center; padding: 10px; background-color: #e9e9e9; border-radius: 5px;">
-            <div>Debate: The Problem of Evil</div>
+        <div id="editableTitle" contenteditable="true">
+            Debate: The Problem of Evil
         </div>
 
         <div class="search">
             <input type="text" id="searchInput" placeholder="Search arguments...">
-            <button onclick="searchArguments()">Search</button>
+            <button onclick="searchCards()">Search</button>
         </div>
 
-        <div class="add-card">
+        <div id="addArgumentForm">
             <h3>Add New Argument</h3>
-            <input type="text" id="newTitle" placeholder="Title">
-            <textarea id="newText" placeholder="Main argument"></textarea>
-            <textarea id="newSupport" placeholder="Supporting information"></textarea>
-            <select id="argumentSide">
-                <option value="against" selected="selected">Against</option>
+            <input type="text" id="newArgumentTitle" placeholder="Title">
+            <textarea id="newArgumentMain" placeholder="Main argument"></textarea>
+            <textarea id="newArgumentSupport" placeholder="Supporting information"></textarea>
+            <select id="sideSelect">
+                <option value="against">Against</option>
                 <option value="for">For</option>
             </select>
-            <button onclick="addNewCard()">Add Argument</button>
+            <button onclick="addNewArgument()">Add Argument</button>
         </div>
 
         <div class="debate-container">
-            <div class="column" id="againstColumn">
+            <div id="againstColumn" class="column">
                 <h2>Against</h2>
+                <div class="dropzone" id="againstDropzone">Drop YouTube link here</div>
             </div>
-            <div class="column" id="forColumn">
+
+            <div id="forColumn" class="column">
                 <h2>For</h2>
+                <div class="dropzone" id="forDropzone">Drop YouTube link here</div>
             </div>
         </div>
 
         <div id="contextMenu" class="context-menu">
-            <button onclick="editCard(this)">Edit</button>
-            <button onclick="deleteCard(this)">Delete</button>
+            <button onclick="editCard()">Edit</button>
+            <button onclick="deleteCard()">Delete</button>
             <button onclick="addHyperlink()">Add Hyperlink</button>
         </div>
 
+        <div id="contextMenu" class="context-menu">
+        <ul>
+              <li id="editOption">Edit</li>
+             <li id="deleteOption">Delete</li>
+             <li id="hyperlinkOption">Add Hyperlink</li>
+        </ul>
+     </div>
+
+  
         <div style="margin-top: 20px;">
             <button onclick="saveDebate()">Save Debate As</button>
-            <input type="file" id="loadDebateFile" style="display:none" onchange="loadDebate(event)">
+            <input type="file" id="loadDebateFile" style="display: none;" onchange="loadDebate()">
             <button onclick="document.getElementById('loadDebateFile').click()">Load Debate</button>
         </div>
     </div>
-
-    <script>
+    
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
         let debateData = {
             against: [
                 {
                     id: 1,
                     title: "Epicurus Paradox",
-                    text: "Is God willing to prevent evil, but not able? Then he is not omnipotent. Is he able, but not willing? Then he is malevolent. Is he both able and willing? Then whence cometh evil? Is he neither able nor willing? Then why call him God?",
+                    main: "Is God willing to prevent evil, but not able? Then he is not omnipotent. Is he able, but not willing? Then he is malevolent. Is he both able and willing? Then whence cometh evil? Is he neither able nor willing? Then why call him God?",
                     support: "This paradox challenges the concept of an omnipotent, omniscient, and omnibenevolent God in the face of the existence of evil."
                 }
             ],
@@ -154,36 +226,50 @@
                 {
                     id: 2,
                     title: "Augustinian Free Will",
-                    text: "Evil is not a positive entity created by God, but a privation of good. Humans, having free will, are responsible for moral evil.",
+                    main: "Evil is not a positive entity created by God, but a privation of good. Humans, having free will, are responsible for moral evil.",
                     support: "Quote from Augustine: 'For evil has no positive nature; but the loss of good has received the name 'evil.'"
-                },
-                {
-                    id: 3,
-                    title: "Modern Perspective on the Problem of Evil",
-                    text: "Contemporary philosophical discussions on the problem of evil and its implications for theism.",
-                    support: `<a href="https://www.youtube.com/watch?app=desktop&v=rac2g_a5ukI" target="_blank">Watch: YouTube video on the Problem of Evil</a>`
                 }
-            ]
+            ],
+            videos: {
+                against: [],
+                for: []
+            }
         };
-
+    
+        let nextId = 3;
+    
         function renderArguments() {
             const againstColumn = document.getElementById('againstColumn');
             const forColumn = document.getElementById('forColumn');
             
-            againstColumn.innerHTML = '<h2>Against</h2>';
-            forColumn.innerHTML = '<h2>For</h2>';
+            if (!againstColumn || !forColumn) {
+                console.error('Columns not found');
+                return;
+            }
             
-            debateData.against.forEach(arg => {
-                const card = createCard(arg, 'against');
-                againstColumn.appendChild(card);
+            againstColumn.innerHTML = '<h2>Against</h2><div class="dropzone" id="againstDropzone">Drop YouTube link here</div>';
+            forColumn.innerHTML = '<h2>For</h2><div class="dropzone" id="forDropzone">Drop YouTube link here</div>';
+            
+            ['against', 'for'].forEach(side => {
+                const column = side === 'against' ? againstColumn : forColumn;
+                renderContent(side, column);
             });
-            
-            debateData.for.forEach(arg => {
-                const card = createCard(arg, 'for');
-                forColumn.appendChild(card);
+    
+            setupDropzones();
+        }
+    
+        function renderContent(side, column) {
+            debateData[side].forEach(arg => {
+                const card = createCard(arg, side);
+                column.appendChild(card);
+            });
+    
+            debateData.videos[side].forEach(video => {
+                const videoCard = createVideoCard(video, side);
+                column.appendChild(videoCard);
             });
         }
-
+    
         function createCard(arg, side) {
             const card = document.createElement('div');
             card.className = 'card';
@@ -191,173 +277,345 @@
             card.dataset.side = side;
             card.innerHTML = `
                 <h3>${arg.title}</h3>
-                <p>${arg.text}</p>
+                <p>${arg.main}</p>
                 <div class="support">${arg.support}</div>
             `;
             card.addEventListener('contextmenu', showContextMenu);
             return card;
         }
-
+    
+        function createVideoCard(video, side) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.id = video.id;
+            card.dataset.side = side;
+            card.dataset.type = 'video';
+            card.innerHTML = `
+                <h3>${video.title}</h3>
+                <div class="video-wrapper">
+                    <iframe src="https://www.youtube.com/embed/${video.videoId}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                </div>
+                <div class="support">${video.support}</div>
+            `;
+            card.addEventListener('contextmenu', showContextMenu);
+            return card;
+        }
+    
+        function addNewArgument() {
+            const title = document.getElementById('newArgumentTitle').value;
+            const main = document.getElementById('newArgumentMain').value;
+            const support = document.getElementById('newArgumentSupport').value;
+            const side = document.getElementById('sideSelect').value;
+            
+            if (title && main) {
+                const newArg = { id: nextId++, title, main, support };
+                debateData[side].push(newArg);
+                renderArguments();
+                document.getElementById('newArgumentTitle').value = '';
+                document.getElementById('newArgumentMain').value = '';
+                document.getElementById('newArgumentSupport').value = '';
+            }
+        }
+    
+        function searchCards() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(searchTerm) ? 'block' : 'none';
+            });
+        }
+    
+        function setupDropzones() {
+            const dropzones = document.querySelectorAll('.dropzone');
+            dropzones.forEach(dropzone => {
+                dropzone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropzone.classList.add('drag-over');
+                });
+    
+                dropzone.addEventListener('dragleave', () => {
+                    dropzone.classList.remove('drag-over');
+                });
+    
+                dropzone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropzone.classList.remove('drag-over');
+                    const link = e.dataTransfer.getData('text');
+                    const videoId = extractVideoId(link);
+                    if (videoId) {
+                        const side = dropzone.id.replace('Dropzone', '');
+                        const title = prompt("Enter a title for this video:");
+                        const support = prompt("Enter supporting information for this video:");
+                        if (title) {
+                            const newVideo = { id: nextId++, title, videoId, support };
+                            debateData.videos[side].push(newVideo);
+                            renderArguments();
+                        }
+                    } else {
+                        alert('Invalid YouTube link');
+                    }
+                });
+            });
+        }
+    
+        function extractVideoId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+    
         function showContextMenu(e) {
             e.preventDefault();
             const contextMenu = document.getElementById('contextMenu');
             contextMenu.style.display = 'block';
             contextMenu.style.left = `${e.pageX}px`;
             contextMenu.style.top = `${e.pageY}px`;
-            contextMenu.dataset.cardId = e.currentTarget.dataset.id;
-            contextMenu.dataset.side = e.currentTarget.dataset.side;
+            
+            const target = e.currentTarget;
+            contextMenu.dataset.targetId = target.dataset.id;
+            contextMenu.dataset.targetSide = target.dataset.side;
+            contextMenu.dataset.targetType = target.dataset.type || 'argument';
+            
+            console.log('Context menu shown for:', {
+                id: contextMenu.dataset.targetId,
+                side: contextMenu.dataset.targetSide,
+                type: contextMenu.dataset.targetType
+            });
         }
-
-        document.addEventListener('click', function() {
+    
+        function hideContextMenu() {
             document.getElementById('contextMenu').style.display = 'none';
-        });
-
-function addHyperlink() {
-    const selection = window.getSelection();
-    if (selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const url = prompt("Enter the URL:");
-        const linkText = selection.toString();
-
-        if (url) {
-            const anchor = document.createElement("a");
-            anchor.href = url.startsWith('http://') || url.startsWith('https://') ? url : `http://${url}`;
-            anchor.target = "_blank";
-            anchor.innerHTML = `Link: '${linkText}'`;
-            range.deleteContents();
-            range.insertNode(anchor);
         }
-    }
-    document.getElementById('contextMenu').style.display = 'none';
-}
-
-
-        function editCard(button) {
-            const contextMenu = button.parentElement;
-            const cardId = contextMenu.dataset.cardId;
-            const side = contextMenu.dataset.side;
-            const card = document.querySelector(`.card[data-id="${cardId}"][data-side="${side}"]`);
-            const argument = debateData[side].find(arg => arg.id == cardId);
-
-            card.innerHTML = `
-                <input type="text" value="${argument.title}" id="editTitle${cardId}">
-                <textarea id="editText${cardId}">${argument.text}</textarea>
-                <textarea id="editSupport${cardId}">${argument.support}</textarea>
-                <button onclick="saveEdit('${side}', ${cardId})">Save</button>
-                <button class="cancel" onclick="cancelEdit('${side}', ${cardId})">Cancel</button
-
->
-            `;
-            contextMenu.style.display = 'none';
-        }
-
-        function saveEdit(side, cardId) {
-            const title = document.getElementById(`editTitle${cardId}`).value;
-            const text = document.getElementById(`editText${cardId}`).value;
-            const support = document.getElementById(`editSupport${cardId}`).value;
+    
+        function editCard() {
+            const contextMenu = document.getElementById('contextMenu');
+            const id = contextMenu.dataset.targetId;
+            const side = contextMenu.dataset.targetSide;
+            const type = contextMenu.dataset.targetType;
             
-            const argument = debateData[side].find(arg => arg.id == cardId);
-            argument.title = title;
-            argument.text = text;
-            argument.support = support;
-            
-            renderArguments();
-        }
-
-        function cancelEdit(side, cardId) {
-            renderArguments();
-        }
-
-        function deleteCard(button) {
-            const contextMenu = button.parentElement;
-            const cardId = contextMenu.dataset.cardId;
-            const side = contextMenu.dataset.side;
-            debateData[side] = debateData[side].filter(arg => arg.id != cardId);
-            renderArguments();
-        }
-
-        function addNewCard() {
-            const newTitle = document.getElementById('newTitle').value;
-            const newText = document.getElementById('newText').value;
-            const newSupport = document.getElementById('newSupport').value;
-            const argumentSide = document.getElementById('argumentSide').value;
-
-            if (newTitle && newText) {
-                const newCard = {
-                    id: Date.now(),
-                    title: newTitle,
-                    text: newText,
-                    support: newSupport
-                };
-
-                debateData[argumentSide].push(newCard);
+            let item;
+            if (type === 'video') {
+                item = debateData.videos[side].find(v => v.id == id);
+            } else {
+                item = debateData[side].find(a => a.id == id);
+            }
+    
+            if (item) {
+                const newTitle = prompt("Edit title:", item.title);
+                const newMain = type === 'video' ? item.videoId : prompt("Edit main argument:", item.main);
+                const newSupport = prompt("Edit supporting information:", item.support);
+    
+                if (newTitle !== null) item.title = newTitle;
+                if (type !== 'video' && newMain !== null) item.main = newMain;
+                if (newSupport !== null) item.support = newSupport;
+    
                 renderArguments();
-                
-                document.getElementById('newTitle').value = '';
-                document.getElementById('newText').value = '';
-                document.getElementById('newSupport').value = '';
+            }
+    
+            hideContextMenu();
+        }
+    
+        function deleteCard() {
+            const contextMenu = document.getElementById('contextMenu');
+            const id = contextMenu.dataset.targetId;
+            const side = contextMenu.dataset.targetSide;
+            const type = contextMenu.dataset.targetType;
+            
+            console.log('Deleting:', { id, side, type });
+            console.log('Before delete:', JSON.parse(JSON.stringify(debateData)));
+    
+            if (type === 'video') {
+                debateData.videos[side] = debateData.videos[side].filter(v => v.id != id);
+            } else {
+                debateData[side] = debateData[side].filter(a => a.id != id);
+            }
+    
+            console.log('After delete:', JSON.parse(JSON.stringify(debateData)));
+            
+            renderArguments();
+            hideContextMenu();
+        }
+    
+        function addHyperlink() {
+            const contextMenu = document.getElementById('contextMenu');
+            const id = contextMenu.dataset.targetId;
+            const side = contextMenu.dataset.targetSide;
+            const type = contextMenu.dataset.targetType;
+    
+            let item;
+            if (type === 'video') {
+                item = debateData.videos[side].find(v => v.id == id);
+            } else {
+                item = debateData[side].find(a => a.id == id);
+            }
+    
+            if (item) {
+                const url = prompt("Enter the URL for the hyperlink:");
+                const text = prompt("Enter the text for the hyperlink:");
+                if (url && text) {
+                    const link = `<a href="${url}" target="_blank">${text}</a>`;
+                    if (type === 'video') {
+                        item.support += ` ${link}`;
+                    } else {
+                        item.main += ` ${link}`;
+                    }
+                    renderArguments();
+                }
+            }
+    
+            hideContextMenu();
+        }
+    function saveDebate() {
+        // Get the content of the editable title
+        const titleElement = document.getElementById('editableTitle');
+        let title = titleElement ? titleElement.textContent.trim() : 'Debate';
+
+        // Sanitize the title for use as a filename
+        title = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
+        // Ensure the title is not empty and not too long
+        if (title.length === 0) title = 'debate';
+        if (title.length > 50) title = title.substring(0, 50);
+
+        const debateString = JSON.stringify(debateData);
+        const blob = new Blob([debateString], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${title}.json`;
+        a.click();
+} 
+
+        function loadDebate() {
+            const fileInput = document.getElementById('loadDebateFile');
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        debateData = JSON.parse(e.target.result);
+                        nextId = Math.max(
+                            ...debateData.against.map(a => a.id),
+                            ...debateData.for.map(a => a.id),
+                            ...debateData.videos.against.map(v => v.id),
+                            ...debateData.videos.for.map(v => v.id)
+                        ) + 1;
+                        renderArguments();
+                    } catch (error) {
+                        console.error('Error parsing JSON:', error);
+                        alert('Error loading debate file. Please ensure it\'s a valid JSON file.');
+                    }
+                };
+                reader.readAsText(file);
             }
         }
+        let hashtagList = new Set(); // Store unique hashtags
 
-        function searchArguments() {
-            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+// add hashtag system below 
+        function handleHashtagInput(event) {
+    if (event.key === '#') {
+        event.preventDefault();
+        const input = event.target;
+        const currentPosition = input.selectionStart;
+        const text = input.value;
 
-            const filteredAgainst = debateData.against.filter(arg => arg.title.toLowerCase().includes(searchInput) || arg.text.toLowerCase().includes(searchInput));
-            const filteredFor = debateData.for.filter(arg => arg.title.toLowerCase().includes(searchInput) || arg.text.toLowerCase().includes(searchInput));
+        // Show hashtag suggestions
+        showHashtagSuggestions(input, currentPosition);
 
-            document.getElementById('againstColumn').innerHTML = '<h2>Against</h2>';
-            document.getElementById('forColumn').innerHTML = '<h2>For</h2>';
+        // Insert the hashtag
+        const newText = text.slice(0, currentPosition) + '#' + text.slice(currentPosition);
+        input.value = newText;
+        input.setSelectionRange(currentPosition + 1, currentPosition + 1);
+    }
+}
 
-            filteredAgainst.forEach(arg => {
-                const card = createCard(arg, 'against');
-                document.getElementById('againstColumn').appendChild(card);
-            });
+function showHashtagSuggestions(input, position) {
+    const suggestions = Array.from(hashtagList);
+    if (suggestions.length === 0) return;
 
-            filteredFor.forEach(arg => {
-                const card = createCard(arg, 'for');
-                document.getElementById('forColumn').appendChild(card);
-            });
-        }
-
-        function saveDebate() {
-            const editableTitle = document.getElementById('editableTitle').innerText.trim();
-            const updatedDebateData = {
-                title: editableTitle,
-                against: debateData.against,
-                for: debateData.for
-            };
-
-            const json = JSON.stringify(updatedDebateData, null, 2);
-            const blob = new Blob([json], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `${editableTitle}.json`;
-            a.click();
-
-            URL.revokeObjectURL(url);
-        }
-
-        function loadDebate(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                const json = e.target.result;
-                const loadedDebateData = JSON.parse(json);
-                debateData = loadedDebateData;
-                document.getElementById('editableTitle').innerText = loadedDebateData.title;
-                renderArguments();
-            };
-
-            reader.readAsText(file);
-        }
-
-        window.onload = function() {
-            renderArguments();
+    const suggestionBox = document.createElement('div');
+    suggestionBox.className = 'hashtag-suggestions';
+    suggestionBox.style.position = 'absolute';
+    suggestionBox.style.zIndex = '1000';
+    
+    suggestions.forEach(tag => {
+        const suggestion = document.createElement('div');
+        suggestion.textContent = '#' + tag;
+        suggestion.onclick = () => {
+            const currentText = input.value;
+            const newText = currentText.slice(0, position) + tag + currentText.slice(position + 1);
+            input.value = newText;
+            input.focus();
+            suggestionBox.remove();
         };
+        suggestionBox.appendChild(suggestion);
+    });
+
+    // Position the suggestion box
+    const inputRect = input.getBoundingClientRect();
+    suggestionBox.style.left = inputRect.left + 'px';
+    suggestionBox.style.top = (inputRect.bottom + window.scrollY) + 'px';
+
+    document.body.appendChild(suggestionBox);
+
+    // Remove suggestions when clicking outside
+    document.addEventListener('click', function removeSuggestions(e) {
+        if (!suggestionBox.contains(e.target) && e.target !== input) {
+            suggestionBox.remove();
+            document.removeEventListener('click', removeSuggestions);
+        }
+    });
+}
+
+function extractHashtags(text) {
+    const hashtags = text.match(/#\w+/g) || [];
+    hashtags.forEach(tag => hashtagList.add(tag.slice(1))); // Remove # and add to set
+    return hashtags;
+}
+
+// Modify your existing addNewArgument function
+function addNewArgument() {
+    const title = document.getElementById('newArgumentTitle').value;
+    const main = document.getElementById('newArgumentMain').value;
+    const support = document.getElementById('newArgumentSupport').value;
+    const side = document.getElementById('sideSelect').value;
+    
+    if (title && main) {
+        const hashtags = extractHashtags(main + ' ' + support);
+        const newArg = { id: nextId++, title, main, support, hashtags };
+        debateData[side].push(newArg);
+        renderArguments();
+        // Clear form fields
+        ['newArgumentTitle', 'newArgumentMain', 'newArgumentSupport'].forEach(id => {
+            document.getElementById(id).value = '';
+        });
+    }
+}
+
+// Add event listeners to your input fields
+['newArgumentMain', 'newArgumentSupport'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', handleHashtagInput);
+});
+        // Initial render of arguments
+        renderArguments();
+    
+        // Add event listeners
+        document.getElementById('searchInput').addEventListener('input', searchCards);
+        document.querySelector('#addArgumentForm button').addEventListener('click', addNewArgument);
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.context-menu')) {
+                hideContextMenu();
+            }
+        });
+    
+        // Make these functions global so they can be called from HTML
+        window.editCard = editCard;
+        window.deleteCard = deleteCard;
+        window.addHyperlink = addHyperlink;
+        window.saveDebate = saveDebate;
+        window.loadDebate = loadDebate;
+    });
     </script>
 </body>
 </html>
-```
